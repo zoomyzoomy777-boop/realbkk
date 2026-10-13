@@ -20,7 +20,7 @@ const T = {
     'btn.editWall': 'แก้ขนาดจอ ↗', 'btn.reloadWall': 'โหลดค่าล่าสุด',
     'sec.wall': 'จอ LED', 'sec.content': 'ภาพบนจอ', 'sec.camera': 'กล้อง', 'sec.set': 'นักแสดง & ฉาก',
     drop: 'อัปโหลดภาพ / ลากไฟล์มาวาง / วาง (Ctrl+V)', dropHere: 'วางภาพเพื่อแสดงบนจอ',
-    's.sunset': 'ทะเลทรายยามเย็น', 's.city': 'เมืองกลางคืน', 's.space': 'อวกาศ', 's.bars': 'Test Pattern',
+    's.sunset': 'ทะเลทรายยามเย็น', 's.city': 'เมืองกลางคืน', 's.space': 'อวกาศ', 's.bars': 'Test Pattern', 's.nosignal': 'No Signal',
     'f.fit': 'การวางภาพ', 'fit.cover': 'เต็มจอ (ครอป)', 'fit.contain': 'พอดีภาพ', 'fit.stretch': 'ยืดเต็มจอ',
     'f.bright': 'ความสว่างจอ', 'f.seams': 'แสดงรอยต่อตู้',
     'f.pixelTrue': 'แสดงพิกเซล LED แบบคมชัด (เห็นเม็ดพิกเซลเมื่อซูมใกล้)',
@@ -62,7 +62,7 @@ const T = {
     'btn.editWall': 'Edit wall size ↗', 'btn.reloadWall': 'Load latest',
     'sec.wall': 'LED wall', 'sec.content': 'Wall content', 'sec.camera': 'Camera', 'sec.set': 'Talent & set',
     drop: 'Upload image / drop a file / paste (Ctrl+V)', dropHere: 'Drop image to show on the wall',
-    's.sunset': 'Desert sunset', 's.city': 'Night city', 's.space': 'Space', 's.bars': 'Test pattern',
+    's.sunset': 'Desert sunset', 's.city': 'Night city', 's.space': 'Space', 's.bars': 'Test pattern', 's.nosignal': 'No signal',
     'f.fit': 'Image fit', 'fit.cover': 'Fill (crop)', 'fit.contain': 'Fit', 'fit.stretch': 'Stretch',
     'f.bright': 'Wall brightness', 'f.seams': 'Show cabinet seams',
     'f.pixelTrue': 'Sharp LED pixels (see individual pixels up close)',
@@ -104,7 +104,7 @@ const T = {
     'btn.editWall': 'サイズを編集 ↗', 'btn.reloadWall': '最新を読み込む',
     'sec.wall': 'LEDウォール', 'sec.content': '表示する画像', 'sec.camera': 'カメラ', 'sec.set': '演者・セット',
     drop: '画像をアップロード / ドロップ / 貼り付け (Ctrl+V)', dropHere: 'ドロップしてLEDに表示',
-    's.sunset': '砂漠の夕景', 's.city': '夜の街', 's.space': '宇宙', 's.bars': 'テストパターン',
+    's.sunset': '砂漠の夕景', 's.city': '夜の街', 's.space': '宇宙', 's.bars': 'テストパターン', 's.nosignal': 'ノーシグナル',
     'f.fit': '画像の配置', 'fit.cover': 'フィル (トリミング)', 'fit.contain': '全体表示', 'fit.stretch': '引き伸ばし',
     'f.bright': 'LEDの明るさ', 'f.seams': 'キャビネットの継ぎ目を表示',
     'f.pixelTrue': 'LEDピクセルをシャープに (近づくと画素が見える)',
@@ -297,20 +297,229 @@ function makeSample(kind) {
     g.fillStyle = gr; g.beginPath(); g.arc(px, py, pr, 0, Math.PI * 2); g.fill();
     g.strokeStyle = 'rgba(230,210,180,.55)'; g.lineWidth = 14;
     g.beginPath(); g.ellipse(px, py, pr * 1.9, pr * 0.35, -0.25, 0, Math.PI * 2); g.stroke();
+  } else if (kind === 'nosignal') {
+    // จอ "NO SIGNAL" แบบทีวีเก่า — วงกลมแถบสีตรงกลาง รายล้อมด้วยบล็อกนอยส์/ลายทาง/แถบไล่สี
+    const cx = 1500, cy = 700, Rc = 650;
+    const noise = (x, y, bw, bh, bg, fg, cell = 14, dens = 0.11) => {
+      g.fillStyle = bg; g.fillRect(x, y, bw, bh); g.fillStyle = fg;
+      for (let yy = y + cell; yy < y + bh - cell; yy += cell) for (let xx = x + cell; xx < x + bw - cell; xx += cell) {
+        if (R() < dens) { g.fillRect(xx, yy, cell - 2, cell - 2); if (R() < 0.5) g.fillRect(xx + cell, yy + (R() < 0.5 ? cell : 0), cell - 2, cell - 2); }
+      }
+    };
+    const stripes = (x, y, bw, bh, sh, seg) => {
+      g.fillStyle = '#f4f4f4'; g.fillRect(x, y, bw, bh); g.fillStyle = '#0a0a0a';
+      for (let sx = x, n = 0; sx < x + bw; sx += seg, n++) {
+        const off = n % 2 ? sh : 0, sw = Math.min(seg, x + bw - sx);
+        for (let yy = y + off - sh; yy < y + bh; yy += sh * 2) { const t = Math.max(yy, y); g.fillRect(sx, t, sw, Math.min(yy + sh, y + bh) - t); }
+      }
+    };
+    const grad = (x, y, bw, bh, cols) => {
+      const gr = g.createLinearGradient(x, 0, x + bw, 0);
+      cols.forEach((col, i) => gr.addColorStop(i / (cols.length - 1), col));
+      g.fillStyle = gr; g.fillRect(x, y, bw, bh);
+    };
+
+    // พื้นกริดเทาเข้ม
+    g.fillStyle = '#1b1b1b'; g.fillRect(0, 0, w, h);
+    g.strokeStyle = 'rgba(255,255,255,.16)'; g.lineWidth = 2;
+    for (let x = 0; x <= w; x += 70) { g.beginPath(); g.moveTo(x, 0); g.lineTo(x, h); g.stroke(); }
+    for (let y = 0; y <= h; y += 70) { g.beginPath(); g.moveTo(0, y); g.lineTo(w, y); g.stroke(); }
+
+    // บล็อกด้านหลังวงกลม
+    noise(280, 80, 1150, 270, '#050505', '#f4f4f4');
+    noise(150, 230, 240, 340, '#f4f4f4', '#050505');
+    noise(2470, 120, 520, 430, '#050505', '#f4f4f4');
+    noise(2800, 560, 400, 170, '#f4f4f4', '#050505');
+    noise(0, 620, 600, 560, '#050505', '#f4f4f4');
+    noise(1850, 1180, 1100, 220, '#050505', '#f4f4f4');
+    stripes(2300, 0, 900, 70, 12, 300);
+    stripes(2080, 250, 360, 80, 12, 180);
+    stripes(2400, 780, 800, 70, 12, 260);
+    stripes(230, 1000, 620, 290, 36, 330);
+    stripes(570, 920, 260, 300, 22, 130);
+    stripes(2350, 960, 850, 380, 34, 270);
+    stripes(0, 1290, 760, 70, 10, 250);
+    stripes(360, 1330, 1300, 70, 10, 260);
+
+    // วงกลมกลาง — วาดทุกแถวโดย clip ให้อยู่ในวงกลม
+    g.save();
+    g.beginPath(); g.arc(cx, cy, Rc, 0, Math.PI * 2); g.clip();
+    const L = cx - Rc, Wd = Rc * 2;
+    g.fillStyle = '#f6f6f6'; g.fillRect(L, 0, Wd, h);
+    g.fillStyle = '#f1cf2b'; g.fillRect(L, 0, Wd, 200);
+    g.fillStyle = '#d2101d'; g.fillRect(cx - 70, 0, 140, 200);
+    g.fillStyle = '#141414'; g.fillRect(cx - 420, 225, 840, 80);
+    g.fillStyle = '#f6f6f6'; g.font = '500 30px "JetBrains Mono", monospace'; g.textAlign = 'center'; g.textBaseline = 'middle';
+    g.fillText('REAL BANGKOK · VIRTUAL PRODUCTION', cx, 266);
+    g.fillStyle = '#141414'; g.fillRect(L, 335, Wd, 60);
+    g.fillStyle = '#f6f6f6'; [-390, -250, -235, 40, 300, 315, 470].forEach((dx) => g.fillRect(cx + dx, 335, 10, 60));
+    for (let x = L, n = 0; x < L + Wd; x += 72, n++) { g.fillStyle = n % 2 ? '#f6f6f6' : '#141414'; g.fillRect(x, 395, 72, 85); }
+    [['#f1cf2b', 0.12], ['#7ccf3e', 0.22], ['#c10a1e', 0.22], ['#d283ad', 0.22], ['#3d63e8', 0.22]].reduce((x, [col, f]) => {
+      g.fillStyle = col; g.fillRect(x, 480, Wd * f + 1, 170); return x + Wd * f;
+    }, L);
+    g.fillStyle = '#1d1d1d'; g.fillRect(L, 650, Wd, 130);
+    g.fillStyle = '#f6f6f6'; g.font = '500 96px "Space Grotesk", sans-serif';
+    g.fillText('NO SIGNAL', cx, 718);
+    for (let y = 680; y <= 750; y += 10) { g.fillRect(cx - 560, y, 290, 3); g.fillRect(cx + 270, y, 290, 3); }
+    // ลายเส้นตั้งความถี่ไล่ระดับ
+    g.fillStyle = '#0a0a0a'; g.fillRect(L, 780, Wd, 130);
+    g.fillStyle = '#f6f6f6';
+    for (let x = cx - 560, s = 26; x < cx + 560; x += s * 2, s = Math.max(6, s * 0.94)) g.fillRect(x, 790, s, 110);
+    [['#3d63e8', 0.1], ['#d283ad', 0.3], ['#c10a1e', 0.3], ['#7ccf3e', 0.3]].reduce((x, [col, f]) => {
+      g.fillStyle = col; g.fillRect(x, 910, Wd * f + 1, 65); return x + Wd * f;
+    }, L);
+    for (let i = 0; i < 11; i++) { const v = 50 + i * 19; g.fillStyle = `rgb(${v},${v},${v})`; g.fillRect(cx - 560 + i * 102, 975, 103, 120); }
+    g.fillStyle = '#0a0a0a'; g.fillRect(L, 1095, Wd, 110);
+    g.strokeStyle = '#f6f6f6'; g.lineWidth = 3;
+    for (let x = cx - 560; x <= cx + 560; x += 56) { g.beginPath(); g.moveTo(x, 1095); g.lineTo(x, 1205); g.stroke(); }
+    for (let y = 1095; y <= 1205; y += 55) { g.beginPath(); g.moveTo(L, y); g.lineTo(L + Wd, y); g.stroke(); }
+    ['#3a3a3a', '#8a8a8a', '#c4c4c4', '#ededed'].forEach((col, i) => { g.fillStyle = col; g.fillRect(cx - 560 + i * 280, 1215, 280, 45); });
+    g.restore();
+
+    // แถบไล่สีวางทับ
+    grad(300, 300, 1460, 80, ['#3d63e8', '#7fd6e8', '#7ccf3e', '#f1e83a', '#e0920f', '#d2101d']);
+    grad(2040, 440, 900, 150, ['#6fd6a0', '#c64aa0', '#d79ab5', '#e0a040', '#f1e070']);
+    grad(200, 1140, 1080, 170, ['#7fd6e8', '#e0a040', '#d79ab5', '#c64aa0', '#c10a1e', '#7b4ad6']);
+
+    // กล่องเทา + ขีดสเกลความละเอียด
+    g.fillStyle = '#777'; g.fillRect(1330, 1220, 1050, 180);
+    g.fillStyle = '#141414';
+    for (let x = 1600, i = 0; x < 2330; x += 14, i++) g.fillRect(x, i % 5 ? 1290 : 1260, 4, i % 5 ? 70 : 100);
+
+    // วงกลมไล่สีด้านขวา
+    const gc = g.createLinearGradient(2000, 0, 2580, 0);
+    gc.addColorStop(0, '#f1d02b'); gc.addColorStop(0.5, '#c64aa0'); gc.addColorStop(1, '#3d63e8');
+    g.fillStyle = gc; g.beginPath(); g.arc(2290, 930, 290, 0, Math.PI * 2); g.fill();
   } else {
-    const bars = ['#c0c0c0', '#c0c000', '#00c0c0', '#00c000', '#c000c0', '#c00000', '#0000c0'];
-    const bw = w / bars.length;
-    bars.forEach((col, i) => { g.fillStyle = col; g.fillRect(i * bw, 0, bw + 1, h * 0.67); });
-    const sub = ['#0000c0', '#131313', '#c000c0', '#131313', '#00c0c0', '#131313', '#c0c0c0'];
-    sub.forEach((col, i) => { g.fillStyle = col; g.fillRect(i * bw, h * 0.67, bw + 1, h * 0.08); });
-    for (let i = 0; i < 6; i++) { const v = Math.round(i * 51); g.fillStyle = `rgb(${v},${v},${v})`; g.fillRect((i * w) / 6, h * 0.75, w / 6 + 1, h * 0.25); }
-    g.strokeStyle = 'rgba(255,255,255,.75)'; g.lineWidth = 3;
-    for (let x = 0; x <= w; x += 200) { g.beginPath(); g.moveTo(x, 0); g.lineTo(x, h); g.stroke(); }
-    for (let y = 0; y <= h; y += 200) { g.beginPath(); g.moveTo(0, y); g.lineTo(w, y); g.stroke(); }
-    g.lineWidth = 6; g.beginPath(); g.arc(w / 2, h / 2, h * 0.42, 0, Math.PI * 2); g.stroke();
-    g.fillStyle = '#d7dbe1'; g.fillRect(w / 2 - 520, h / 2 - 70, 1040, 140);
-    g.fillStyle = '#0a0a0a'; g.font = '700 92px "Space Grotesk", sans-serif'; g.textAlign = 'center'; g.textBaseline = 'middle';
-    g.fillText('REAL BANGKOK · VP TEST', w / 2, h / 2 + 4);
+    // Test pattern สไตล์โปสเตอร์กริดดำ — ยังมีแถบสี/สเกลเทา/วงกลม/กากบาทให้เช็กจอได้จริง
+    const W = '#f2f2f2', M = 70, cx = w / 2, cy = h / 2;
+    const smpte = ['#c0c0c0', '#c0c000', '#00c0c0', '#00c000', '#c000c0', '#c00000', '#0000c0'];
+    const pop = ['#ff2e93', '#ffd400', '#00d1ff', '#3ddc4a', '#ff5a1f', '#7b5cff', '#ffffff', '#e8b48a'];
+    const line = (x1, y1, x2, y2) => { g.beginPath(); g.moveTo(x1, y1); g.lineTo(x2, y2); g.stroke(); };
+    const plus = (x, y, s) => { line(x - s, y, x + s, y); line(x, y - s, x, y + s); };
+    const sparkle = (x, y, s) => {
+      g.beginPath();
+      for (let i = 0; i < 8; i++) { const a = (i * Math.PI) / 4, r = i % 2 ? s * 0.22 : s; g.lineTo(x + Math.cos(a) * r, y + Math.sin(a) * r); }
+      g.closePath(); g.stroke();
+    };
+    const pill = (x, y, pw, ph, txt) => {
+      g.fillStyle = '#0a0a0a'; g.beginPath(); g.roundRect(x - pw / 2, y - ph / 2, pw, ph, ph / 2); g.fill(); g.stroke();
+      g.fillStyle = W; g.font = '500 30px "JetBrains Mono", monospace'; g.textAlign = 'center'; g.textBaseline = 'middle';
+      g.fillText(txt, x, y + 1);
+    };
+    const mono = (txt, x, y, size = 24, align = 'left') => {
+      g.fillStyle = W; g.font = `500 ${size}px "JetBrains Mono", monospace`; g.textAlign = align; g.textBaseline = 'alphabetic'; g.fillText(txt, x, y);
+    };
+
+    g.fillStyle = '#0a0a0a'; g.fillRect(0, 0, w, h);
+    // กริด: เส้นรอง 50px, เส้นหลัก 200px
+    g.lineWidth = 1; g.strokeStyle = 'rgba(255,255,255,.07)';
+    for (let x = 0; x <= w; x += 50) line(x, 0, x, h);
+    for (let y = 0; y <= h; y += 50) line(0, y, w, y);
+    g.lineWidth = 2; g.strokeStyle = 'rgba(255,255,255,.22)';
+    for (let x = 0; x <= w; x += 200) line(x, 0, x, h);
+    for (let y = 0; y <= h; y += 200) line(0, y, w, y);
+
+    // กรอบ + มุม
+    g.strokeStyle = W; g.lineWidth = 3;
+    g.strokeRect(M, M, w - M * 2, h - M * 2);
+    [[M, M], [w - M, M], [M, h - M], [w - M, h - M]].forEach(([x, y]) => sparkle(x, y, 34));
+    pill(cx, M, 900, 64, 'REAL BANGKOK · VIRTUAL PRODUCTION TEST');
+    pill(cx, h - M, 900, 64, `LED WALL ALIGNMENT · ${w} × ${h} PX`);
+
+    // แถบสีแนวตั้งสองข้าง (SMPTE + สีสด + สเกลเทา)
+    const strip = [...smpte, null, ...pop, null, '#ffffff', '#bfbfbf', '#808080', '#404040', '#000000'];
+    [M + 46, w - M - 46 - 30].forEach((sx) => {
+      let y = 200;
+      strip.forEach((col) => {
+        if (col) { g.fillStyle = col; g.fillRect(sx, y, 30, 30); if (col === '#000000') { g.strokeStyle = W; g.lineWidth = 1; g.strokeRect(sx, y, 30, 30); } }
+        y += col ? 38 : 50;
+      });
+    });
+
+    // วงกลมกลางจอ + กากบาท + ขีดสเกล
+    g.strokeStyle = 'rgba(255,255,255,.85)'; g.lineWidth = 3;
+    g.beginPath(); g.arc(cx, cy, h * 0.4, 0, Math.PI * 2); g.stroke();
+    g.lineWidth = 2; g.beginPath(); g.arc(cx, cy, h * 0.2, 0, Math.PI * 2); g.stroke();
+    line(cx - h * 0.44, cy, cx + h * 0.44, cy); line(cx, cy - h * 0.44, cx, cy + h * 0.44);
+    for (let i = 0; i < 72; i++) {
+      const a = (i * Math.PI) / 36, r1 = h * 0.4, r2 = r1 - (i % 6 ? 12 : 28);
+      line(cx + Math.cos(a) * r1, cy + Math.sin(a) * r1, cx + Math.cos(a) * r2, cy + Math.sin(a) * r2);
+    }
+
+    // พิกเซลไล่แนวทแยง (เช็กสี/ขอบพิกเซล)
+    const ps = 44;
+    for (let k = 0; k < 26; k++) {
+      const bx = 1180 + k * ps, by = 1010 - k * ps * 0.62;
+      for (let j = -2; j <= 2; j++) {
+        if (R() < 0.3) continue;
+        g.fillStyle = pop[Math.floor(R() * pop.length)];
+        g.fillRect(Math.round(bx + j * ps * 0.5), Math.round(by + j * ps), ps - 4, ps - 4);
+      }
+    }
+
+    // หัวข้อใหญ่ฝั่งซ้าย — กล่องขาวกลับสีตัวอักษร
+    g.fillStyle = W;
+    g.fillRect(470, 170, 230, 210); g.fillRect(260, 600, 150, 190);
+    g.globalCompositeOperation = 'difference';
+    g.font = '700 200px "Space Grotesk", sans-serif'; g.textAlign = 'left'; g.textBaseline = 'alphabetic';
+    ['REAL', 'BANGKOK', 'VP TEST'].forEach((t, i) => g.fillText(t, 240, 360 + i * 200));
+    g.globalCompositeOperation = 'source-over';
+    mono('Calibrate the wall. Match the camera.', 250, 820, 28);
+    mono('Shoot it like it was always there.', 250, 860, 28);
+
+    // สเกลเทา 11 ขั้น
+    for (let i = 0; i <= 10; i++) {
+      const v = Math.round((i / 10) * 255);
+      g.fillStyle = `rgb(${v},${v},${v})`; g.fillRect(250 + i * 66, 960, 66, 110);
+      mono(String(i * 10), 250 + i * 66 + 33, 1110, 20, 'center');
+    }
+    g.strokeStyle = W; g.lineWidth = 2; g.strokeRect(250, 960, 726, 110);
+
+    // สามเหลี่ยมไล่เหลือง + แท่งไล่ขาว-ดำ
+    let gr = g.createLinearGradient(1000, 0, 1230, 0);
+    gr.addColorStop(0, 'rgba(255,230,0,0)'); gr.addColorStop(1, '#ffe600');
+    g.fillStyle = gr; g.beginPath(); g.moveTo(1000, 1180); g.lineTo(1230, 1130); g.lineTo(1230, 1230); g.closePath(); g.fill();
+    gr = g.createLinearGradient(0, 640, 0, 1240);
+    gr.addColorStop(0, '#ffffff'); gr.addColorStop(1, '#000000');
+    g.fillStyle = gr; g.fillRect(1100, 640, 44, 470);
+    g.strokeStyle = W; g.strokeRect(1100, 640, 44, 470);
+
+    // ไอคอนเส้นบาง
+    g.strokeStyle = W; g.lineWidth = 3;
+    for (let i = 0; i < 12; i++) { const a = (i * Math.PI) / 6; line(2150, 300, 2150 + Math.cos(a) * 130, 300 + Math.sin(a) * 130); }
+    g.lineWidth = 2;
+    [[1150, 330], [2300, 1050], [1950, 1180]].forEach(([x, y]) => { g.beginPath(); g.arc(x, y, 34, 0, Math.PI * 2); g.stroke(); plus(x, y, 22); });
+    g.lineWidth = 6; [[2000, 560], [1060, 520], [2050, 800]].forEach(([x, y]) => plus(x, y, 26));
+    g.lineWidth = 3; [[1350, 230], [2380, 760]].forEach(([x, y]) => sparkle(x, y, 40));
+    g.lineWidth = 14; g.lineCap = 'round';
+    line(2400, 400, 2440, 440); line(2440, 400, 2400, 440); line(2470, 400, 2510, 440); line(2510, 400, 2470, 440);
+    g.lineCap = 'butt';
+
+    // โค้ดสี่เหลี่ยม (แบบ QR) + บาร์โค้ด
+    const qx = 2620, qy = 210, qs = 11, qn = 21;
+    g.fillStyle = W; g.fillRect(qx - 14, qy - 14, qn * qs + 28, qn * qs + 28);
+    g.fillStyle = '#0a0a0a';
+    for (let y = 0; y < qn; y++) for (let x = 0; x < qn; x++) {
+      const fin = (x < 7 && y < 7) || (x >= qn - 7 && y < 7) || (x < 7 && y >= qn - 7);
+      if (fin) {
+        const fx = x % 14, fy = y % 14;
+        if (fx === 0 || fx === 6 || fy === 0 || fy === 6 || (fx >= 2 && fx <= 4 && fy >= 2 && fy <= 4)) g.fillRect(qx + x * qs, qy + y * qs, qs, qs);
+      } else if (R() < 0.48) g.fillRect(qx + x * qs, qy + y * qs, qs, qs);
+    }
+    g.fillStyle = W;
+    for (let x = 2620; x < 2860;) { const bw = 3 + Math.floor(R() * 10); g.fillRect(x, 560, bw, 130); x += bw + 4 + Math.floor(R() * 8); }
+    mono('RBK-VP-0001', 2620, 725, 22);
+
+    // หัวข้อชิดขวาล่าง
+    g.fillStyle = W; g.font = '700 128px "Space Grotesk", sans-serif'; g.textAlign = 'right'; g.textBaseline = 'alphabetic';
+    ['Align.', 'Focus.', 'Shoot.'].forEach((t, i) => g.fillText(t, w - 240, 980 + i * 120));
+
+    // ป้ายกำกับเล็ก
+    mono('GRID 200 PX · SUB 50 PX', 250, 140, 22);
+    mono('CENTER ⌖ ' + cx + ', ' + cy, cx + 20, cy + h * 0.2 + 40, 22);
+    mono('SMPTE 75% · REC.709', w - 240, 140, 22, 'right');
+    mono('2026 · BANGKOK', w - 240, 790, 22, 'right');
   }
   return c;
 }
@@ -1094,6 +1303,12 @@ if (!restoreImage()) {
   P.sample = P.sample || 'sunset';
   source = makeSample(P.sample);
 } else isSample = false;
+// Test pattern วาดตัวอักษรบน canvas — รอฟอนต์โหลดแล้ววาดใหม่ ไม่งั้นจะได้ฟอนต์สำรอง
+if (document.fonts) {
+  Promise.all(['700 100px "Space Grotesk"', '500 24px "JetBrains Mono"'].map((f) => document.fonts.load(f))).then(() => {
+    if (isSample && (P.sample === 'bars' || P.sample === 'nosignal')) { source = makeSample(P.sample); paintTexture(); }
+  }).catch(() => {});
+}
 syncInputs();
 resize();
 setWall(wall, true);
