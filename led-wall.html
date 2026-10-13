@@ -1,0 +1,169 @@
+<!doctype html>
+<html lang="th">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>LED Wall Configurator | REAL Bangkok</title>
+  <meta name="description" id="metaDesc" content="คำนวณขนาด LED Wall — ปรับ Pixel Pitch, ขนาดตู้, จำนวนตู้, องศาการต่อจอ พร้อมแสดงความละเอียดพิกเซลและขนาดจอ">
+  <link rel="icon" href="logo/Asset 1 (1).png">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Sans+Thai:wght@400;500;600&family=JetBrains+Mono:wght@400;500;600&family=Space+Grotesk:wght@500;600;700&family=Kanit:wght@500;600;700&family=Noto+Sans+JP:wght@400;500;600&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="css/style.css">
+</head>
+<body>
+  <header class="topbar">
+    <a href="index.html" title="หน้าหลัก"><img class="brand" src="logo/REAL-bangkok3.jpg" alt="REAL Bangkok"></a>
+    <div class="titles">
+      <h1>LED Wall Configurator</h1>
+      <p data-i18n="sub">ออกแบบและคำนวณขนาดจอ LED — ปรับ Pitch · ขนาด · องศาการต่อจอ</p>
+    </div>
+    <div class="top-actions">
+      <div class="seg lang" id="langSeg" role="group" aria-label="Language">
+        <button type="button" data-v="th" lang="th">TH</button>
+        <button type="button" data-v="en" lang="en">EN</button>
+        <button type="button" data-v="ja" lang="ja">JP</button>
+      </div>
+      <a class="btn ghost" id="btnSim" href="vp-sim.html" data-i18n="btn.sim" style="text-decoration:none">จำลองการถ่ายทำ ↗</a>
+      <button class="btn ghost" id="btnReset" type="button" data-i18n="btn.reset">รีเซ็ต</button>
+      <button class="btn ghost" id="btnLink" type="button" data-i18n="btn.link">คัดลอกลิงก์</button>
+      <button class="btn" id="btnCopy" type="button" data-i18n="btn.copy">คัดลอกสรุป</button>
+    </div>
+  </header>
+
+  <main class="layout">
+    <!-- ============ CONTROLS ============ -->
+    <aside class="panel controls">
+      <section class="group">
+        <h2><span class="num">1</span> Pixel Pitch</h2>
+        <div class="chips" id="pitchChips"></div>
+        <label class="field" id="customPitchField" hidden>
+          <span data-i18n="f.customPitch">Pitch กำหนดเอง (mm)</span>
+          <input type="number" id="customPitch" min="0.3" max="40" step="0.001">
+        </label>
+      </section>
+
+      <section class="group">
+        <h2><span class="num">2</span> <span data-i18n="sec.cabinet">ขนาดตู้ (Cabinet)</span></h2>
+        <label class="field">
+          <span data-i18n="f.cabModel">รุ่นตู้</span>
+          <select id="cabSelect"></select>
+        </label>
+        <div class="row2">
+          <label class="field"><span data-i18n="f.w">กว้าง (mm)</span><input type="number" id="cabW" min="50" max="3000" step="0.5"></label>
+          <label class="field"><span data-i18n="f.h">สูง (mm)</span><input type="number" id="cabH" min="50" max="3000" step="0.5"></label>
+        </div>
+        <label class="check">
+          <input type="checkbox" id="pxOverride">
+          <span data-i18n="f.pxOverride">กำหนดพิกเซลต่อตู้เอง (ตามสเปกผู้ผลิต)</span>
+        </label>
+        <div class="row2" id="pxOverrideFields" hidden>
+          <label class="field"><span data-i18n="f.pxW">พิกเซลกว้าง</span><input type="number" id="cabPxW" min="1" max="4000" step="1"></label>
+          <label class="field"><span data-i18n="f.pxH">พิกเซลสูง</span><input type="number" id="cabPxH" min="1" max="4000" step="1"></label>
+        </div>
+        <p class="hint" id="cabPxHint"></p>
+      </section>
+
+      <section class="group">
+        <h2><span class="num">3</span> <span data-i18n="sec.size">ขนาดจอ</span></h2>
+        <div class="seg" id="modeSeg">
+          <button type="button" data-v="count" data-i18n="mode.count">ตามจำนวนตู้</button>
+          <button type="button" data-v="size" data-i18n="mode.size">ตามขนาด (เมตร)</button>
+        </div>
+        <div id="countFields">
+          <div class="row2">
+            <label class="field"><span data-i18n="f.cols">จำนวนตู้แนวนอน</span>
+              <div class="stepper"><button type="button" data-step="cols:-1">−</button><input type="number" id="cols" min="1" max="100" step="1"><button type="button" data-step="cols:1">+</button></div>
+            </label>
+            <label class="field"><span data-i18n="f.rows">จำนวนตู้แนวตั้ง</span>
+              <div class="stepper"><button type="button" data-step="rows:-1">−</button><input type="number" id="rows" min="1" max="100" step="1"><button type="button" data-step="rows:1">+</button></div>
+            </label>
+          </div>
+        </div>
+        <div id="sizeFields" hidden>
+          <div class="row2">
+            <label class="field"><span data-i18n="f.targetW">กว้างที่ต้องการ (m)</span><input type="number" id="targetW" min="0.1" max="100" step="0.1"></label>
+            <label class="field"><span data-i18n="f.targetH">สูงที่ต้องการ (m)</span><input type="number" id="targetH" min="0.1" max="50" step="0.1"></label>
+          </div>
+          <p class="hint" id="sizeHint"></p>
+        </div>
+        <label class="field">
+          <span data-i18n="f.mountH">ความสูงจากพื้นถึงขอบล่างจอ (m)</span>
+          <input type="number" id="mountH" min="0" max="30" step="0.1">
+        </label>
+      </section>
+
+      <section class="group">
+        <h2><span class="num">4</span> <span data-i18n="sec.angle">องศาการต่อจอ</span></h2>
+        <div class="seg three" id="curveSeg">
+          <button type="button" data-v="flat" data-i18n="curve.flat">จอแบน</button>
+          <button type="button" data-v="uniform" data-i18n="curve.uniform">โค้งเท่ากัน</button>
+          <button type="button" data-v="custom" data-i18n="curve.custom">กำหนดทีละรอยต่อ</button>
+        </div>
+        <div id="uniformFields" hidden>
+          <label class="field">
+            <span data-i18n-html="f.angle">องศาต่อรอยต่อ <em class="muted">(+ โค้งเข้า / − โค้งออก)</em></span>
+            <div class="range-row">
+              <input type="range" id="angleRange" min="-15" max="15" step="0.5">
+              <input type="number" id="angle" min="-90" max="90" step="0.5">
+              <span class="unit">°</span>
+            </div>
+          </label>
+          <div class="chips small" id="anglePresets">
+            <button type="button" data-a="-5">−5°</button>
+            <button type="button" data-a="-2.5">−2.5°</button>
+            <button type="button" data-a="2.5">+2.5°</button>
+            <button type="button" data-a="5">+5°</button>
+            <button type="button" data-a="7.5">+7.5°</button>
+            <button type="button" data-a="10">+10°</button>
+          </div>
+        </div>
+        <div id="customFields" hidden>
+          <div class="chips small">
+            <button type="button" id="jointsCorner" data-i18n="j.corner">มุม 90° ตรงกลาง</button>
+            <button type="button" id="jointsTwoCorner" data-i18n="j.twoCorner">ตัว U (90° สองมุม)</button>
+            <button type="button" id="jointsClear" data-i18n="j.clear">ล้างเป็น 0°</button>
+          </div>
+          <div class="joints" id="jointsList"></div>
+        </div>
+        <p class="hint warn" id="angleWarn" hidden></p>
+      </section>
+
+      <details class="group adv">
+        <summary data-i18n="adv.summary">ค่าประมาณการ (น้ำหนัก / ไฟฟ้า)</summary>
+        <div class="row2">
+          <label class="field"><span data-i18n="f.kg">น้ำหนัก (kg/m²)</span><input type="number" id="kgM2" min="1" max="200" step="1"></label>
+          <label class="field"><span data-i18n="f.wm2">ไฟสูงสุด (W/m²)</span><input type="number" id="wM2" min="10" max="3000" step="10"></label>
+        </div>
+        <p class="hint" data-i18n="adv.hint">ค่าเริ่มต้นเป็นค่าเฉลี่ยของตู้ indoor ทั่วไป ควรแก้ตามสเปกตู้จริง</p>
+      </details>
+    </aside>
+
+    <!-- ============ WORKSPACE ============ -->
+    <section class="workspace">
+      <div class="panel viewer">
+        <div class="viewer-head">
+          <div class="seg tabs" id="viewTabs">
+            <button type="button" data-v="3d" data-i18n="view.3d">มุมมอง 3D</button>
+            <button type="button" data-v="front" data-i18n="view.front">ด้านหน้า</button>
+            <button type="button" data-v="top" data-i18n="view.top">มุมบน (Top)</button>
+          </div>
+          <span class="viewer-hint" id="viewerHint" data-i18n="view.hint">ลากเพื่อหมุน · เลื่อนลูกกลิ้งเพื่อซูม</span>
+        </div>
+        <div class="canvas-wrap" id="canvasWrap">
+          <canvas id="view"></canvas>
+          <div class="hud" id="hud"></div>
+        </div>
+      </div>
+
+      <div class="hero" id="hero"></div>
+      <div class="stats" id="stats"></div>
+      <p class="foot" data-i18n="foot">ตัวเลขน้ำหนัก ไฟฟ้า และจำนวนพอร์ตเป็นค่าประมาณการเพื่อวางแผนเบื้องต้น โปรดตรวจสอบกับสเปกผู้ผลิตก่อนติดตั้งจริง</p>
+    </section>
+  </main>
+
+  <div class="toast" id="toast" role="status" aria-live="polite"></div>
+  <script src="js/i18n.js"></script>
+  <script src="js/app.js"></script>
+</body>
+</html>
