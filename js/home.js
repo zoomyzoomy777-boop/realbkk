@@ -523,12 +523,18 @@
     // ระยะห่างจากต้นไม้ที่ใกล้ที่สุด (ลบด้วยรัศมีที่ต้องเว้น)
     const actRoom = (p) => p.tree.R * .5 + ACT_R;
     const clearance = (x, z) => visible.reduce((m, p) => Math.min(m, Math.hypot(x - p.to[0], z - p.to[1]) - actRoom(p)), 1e9);
-    // สุ่มจุดหมายใหม่ในป่าที่ไม่ทับต้นไม้ (place = วางตัวที่จุดนั้นทันที)
+    // จุดนี้อยู่ในจอที่มองเห็นหรือไม่ (ไม่ให้เดินหลุดขอบล่าง/ข้าง จนมองไม่เห็นตัว)
+    const onScreen = (x, z) => {
+      const [sx, sy] = proj(x, 0, z), [, st] = proj(x, ACT_H, z);
+      return sx > W * .1 && sx < W * .9 && st > CH * .12 && sy < Math.min(CH, innerHeight) * .88;
+    };
+    // สุ่มจุดหมายใหม่ในป่าที่ไม่ทับต้นไม้และอยู่ในจอ (place = วางตัวที่จุดนั้นทันที)
     function actTarget(place) {
       const hw = forestW / 2 + 40, hh = forestH / 2 + 40;
       let bx = 0, bz = 0, bc = -1e9;
-      for (let i = 0; i < 24; i++) {
-        const x = (Math.random() * 2 - 1) * hw, z = (Math.random() * 2 - 1) * hh, c = clearance(x, z);
+      for (let i = 0; i < 40; i++) {
+        const x = (Math.random() * 2 - 1) * hw, z = (Math.random() * 2 - 1) * hh;
+        const c = clearance(x, z) - (onScreen(x, z) ? 0 : 1000);
         if (c > bc) { bx = x; bz = z; bc = c; }
         if (c > 30) break;
       }
