@@ -20,7 +20,7 @@
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link rel="preconnect" href="https://i.ytimg.com">
-  <link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Sans+Thai:wght@400;500;600&family=JetBrains+Mono:wght@400;500;600&family=Space+Grotesk:wght@500;600;700&family=Kanit:wght@500;600;700&family=Noto+Sans+JP:wght@400;500;600&display=swap" rel="stylesheet">
+  <link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Sans+Thai:wght@400;500;600&family=JetBrains+Mono:wght@400;500;600&family=Space+Grotesk:wght@300;500;600;700&family=Kanit:wght@500;600;700&family=Noto+Sans+JP:wght@400;500;600&display=swap" rel="stylesheet">
   <link rel="stylesheet" href="css/style.css">
   <link rel="stylesheet" href="css/home.css">
 </head>
@@ -39,6 +39,7 @@
   <header class="topbar">
     <a href="index.html"><img class="brand" src="logo/REAL-bangkok3.jpg" alt="REAL Bangkok"></a>
     <nav class="nav">
+      <a href="photos.html" data-i18n="nav.photos">ภาพเบื้องหลัง</a>
       <a href="vp-sim.html" data-i18n="nav.sim">จำลองการถ่ายทำ</a>
       <a href="led-wall.html" class="nav-tool" data-i18n="nav.tool">LED Wall Configurator</a>
     </nav>
@@ -58,27 +59,23 @@
       <span class="yr">2021—2025</span>
     </div>
     <div class="hero-stage">
-      <div class="hero-slides" id="heroSlides" aria-hidden="true"></div>
+      <div class="hero-slides" id="heroSlides" aria-hidden="true">
+        <img class="on" src="images/gallery/full/jes-3042.webp" alt="">
+        <iframe class="hero-yt" src="https://www.youtube-nocookie.com/embed/T0t3ciS3Dks?autoplay=1&amp;mute=1&amp;loop=1&amp;playlist=T0t3ciS3Dks&amp;controls=0&amp;modestbranding=1&amp;playsinline=1&amp;rel=0&amp;disablekb=1&amp;iv_load_policy=3" title="Behind The Production 2025" tabindex="-1" allow="autoplay; encrypted-media; picture-in-picture" frameborder="0"></iframe>
+      </div>
       <div class="hero-hud" aria-hidden="true">
         <span class="ring"></span>
         <div class="tl">&gt;Rendering... <b id="hudPct">87%</b><br>ICVFX · Live</div>
         <span class="cross c1"></span><span class="cross c2"></span>
-        <div class="xy">X_13.7563<br>Y_100.5018<br>Z_04.0000</div>
         <div class="br">//SCN_<span id="hudScn">01</span></div>
       </div>
       <div class="hero-inner">
-        <p class="eyebrow">Behind The Production 2025</p>
         <h1>Virtual<br>Production<span class="slash">/01</span></h1>
         <p class="lead" data-i18n="hero.lead">ถ่ายทำบนเวที LED Volume ด้วย In-Camera VFX — ฉากเปลี่ยนได้ทันที แสงสะท้อนจริง จบงานได้ในกล้อง</p>
         <div class="hero-cta">
           <a class="btn" href="#videos"><span data-i18n="hero.cta1">ดูวิดีโอผลงาน</span><span class="arr">↗</span></a>
-          <a class="btn ghost" href="#photos"><span data-i18n="hero.cta2">ภาพเบื้องหลัง</span><span class="arr">↘</span></a>
+          <a class="btn ghost" href="photos.html"><span data-i18n="hero.cta2">ภาพเบื้องหลัง</span><span class="arr">↘</span></a>
         </div>
-        <dl class="hero-stats">
-          <div><dt id="statVideos">11</dt><dd data-i18n="stat.videos">วิดีโอผลงาน</dd></div>
-          <div><dt id="statPhotos">82</dt><dd data-i18n="stat.photos">ภาพเบื้องหลัง</dd></div>
-          <div><dt>2021–25</dt><dd data-i18n="stat.years">ปีที่ทำงาน</dd></div>
-        </dl>
       </div>
     </div>
   </section>
@@ -86,40 +83,18 @@
   <main class="home-main">
     <!-- ============ VIDEOS ============ -->
     <section class="sec" id="videos">
-      <div class="sec-head">
-        <span class="sec-num">01</span>
-        <h2 data-i18n="sec.videos">วิดีโอผลงาน</h2>
-        <p data-i18n="sec.videosSub">โฆษณา · Music Video · Live Performance ที่ถ่ายทำด้วย Virtual Production</p>
-      </div>
-      <div class="vid-featured" id="vidFeatured"></div>
-      <h3 class="sub-head"><span data-i18n="sec.playlist">Music Video &amp; Live</span>
-        <a href="https://www.youtube.com/playlist?list=PLheltF9b_MaKxw93Tf2hFwQGweFtbq2q9" target="_blank" rel="noopener" data-i18n="sec.playlistLink">ดูเพลย์ลิสต์บน YouTube ↗</a>
-      </h3>
-      <div class="vid-grid" id="vidGrid"></div>
-    </section>
-
-    <!-- ============ PHOTOS ============ -->
-    <section class="sec" id="photos">
-      <div class="sec-head">
-        <span class="sec-num">02</span>
-        <h2 data-i18n="sec.photos">ภาพเบื้องหลังการถ่ายทำ</h2>
-        <p data-i18n="sec.photosSub">Behind The Production — เวที LED, ทีมงาน และระบบควบคุมหน้างาน</p>
-      </div>
-      <!-- Point cloud forest: แต่ละภาพ = ต้นไม้ 1 ต้น / ชี้ที่ต้นไม้ = ภาพเต็ม / คลิกเพื่อขยาย -->
-      <div class="pc-bar">
-        <div class="chips filter" id="photoFilter">
-          <button type="button" data-f="all" class="on" data-i18n="f.all">ทั้งหมด</button>
-          <button type="button" data-f="stage" data-i18n="f.stage">เวที LED</button>
-          <button type="button" data-f="crew" data-i18n="f.crew">ทีมงาน &amp; กล้อง</button>
-          <button type="button" data-f="control" data-i18n="f.control">ระบบควบคุม</button>
+      <!-- Video mosaic: แถบชื่อ + ลิงก์ในวงเล็บ / ตารางภาพเต็มความกว้างจอ ไม่มีช่องว่าง (อ้างอิงดีไซน์ marlonlionel.ch) -->
+      <div class="vid-bar">
+        <div class="vid-read" aria-live="polite">
+          <span id="vidReadHint" data-i18n="vid.hint">ชี้ที่ภาพเพื่อดูชื่อผลงาน · คลิกเพื่อเล่น</span>
+          <span id="vidReadNow" hidden><b id="vidReadTag"></b> · <span id="vidReadTitle"></span></span>
         </div>
-        <div class="pc-read" aria-hidden="true"><b id="pcIdx">--</b> / <span id="pcTotal">00</span> · <span id="pcCat" data-i18n="pc.hint">ชี้ที่ต้นไม้เพื่อดูภาพเต็ม · คลิกเพื่อขยาย</span></div>
+        <nav class="vid-links">
+          <a href="https://www.youtube.com/playlist?list=PLheltF9b_MaKxw93Tf2hFwQGweFtbq2q9" target="_blank" rel="noopener" data-i18n="sec.playlistLink">ดูเพลย์ลิสต์บน YouTube ↗</a>
+          <a href="https://www.youtube.com/@realbangkok7314/videos" target="_blank" rel="noopener" data-i18n="sec.channelLink">ดูช่องบน YouTube ↗</a>
+        </nav>
       </div>
-      <div class="pc" id="pc">
-        <canvas class="pc-canvas" id="pcCanvas" aria-hidden="true"></canvas>
-        <div class="pc-tiles" id="photoGrid"></div>
-        <button type="button" class="pc-reveal" id="pcReveal" tabindex="-1"><img alt=""></button>
-      </div>
+      <div class="vid-wall" id="vidWall"></div>
     </section>
 
     <!-- ============ TOOL CTA ============ -->
@@ -153,7 +128,6 @@
     <div class="lb-count" id="lbCount"></div>
   </div>
 
-  <script src="js/gallery-data.js"></script>
   <script src="js/home.js"></script>
 </body>
 </html>

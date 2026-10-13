@@ -1,0 +1,85 @@
+<!doctype html>
+<html lang="th">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>ภาพเบื้องหลัง | REAL Bangkok</title>
+  <meta name="description" id="metaDesc" content="ผลงาน Virtual Production ของ REAL Bangkok — LED Volume, In-Camera VFX, Music Video, โฆษณา และไลฟ์ พร้อมภาพเบื้องหลังการถ่ายทำ">
+  <link rel="icon" href="logo/Asset 1 (1).png">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Sans+Thai:wght@400;500;600&family=JetBrains+Mono:wght@400;500;600&family=Space+Grotesk:wght@300;500;600;700&family=Kanit:wght@500;600;700&family=Noto+Sans+JP:wght@400;500;600&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="css/style.css">
+  <link rel="stylesheet" href="css/home.css">
+</head>
+<body class="home">
+  <header class="topbar">
+    <a href="index.html"><img class="brand" src="logo/REAL-bangkok3.jpg" alt="REAL Bangkok"></a>
+    <nav class="nav">
+      <a href="photos.html" aria-current="page" data-i18n="nav.photos">ภาพเบื้องหลัง</a>
+      <a href="vp-sim.html" data-i18n="nav.sim">จำลองการถ่ายทำ</a>
+      <a href="led-wall.html" class="nav-tool" data-i18n="nav.tool">LED Wall Configurator</a>
+    </nav>
+    <div class="sys-clock" aria-hidden="true">SYS_TIME<b id="sysClock">--:--:--</b>BKK UTC+7</div>
+    <div class="seg lang" id="langSeg" role="group" aria-label="Language">
+      <button type="button" data-v="th" lang="th">TH</button>
+      <button type="button" data-v="en" lang="en">EN</button>
+      <button type="button" data-v="ja" lang="ja">JP</button>
+    </div>
+  </header>
+
+  <main class="home-main">
+    <!-- ============ PHOTOS ============ -->
+    <section class="sec" id="photos">
+      <!-- Point cloud forest: แต่ละภาพ = ต้นไม้ 1 ต้น / ชี้ที่ต้นไม้ = ภาพเต็ม / คลิกเพื่อขยาย -->
+      <div class="pc" id="pc">
+        <canvas class="pc-canvas" id="pcCanvas" aria-hidden="true"></canvas>
+        <div class="pc-tiles" id="photoGrid"></div>
+        <button type="button" class="pc-reveal" id="pcReveal" tabindex="-1"><img alt=""><span class="pc-cap" aria-hidden="true"><b id="capScn"></b><span id="capCat"></span><span id="capId"></span></span></button>
+        <!-- เป้าเล็งตามเมาส์ -->
+        <div class="pc-aim" id="pcAim" aria-hidden="true"><i class="h"></i><i class="v"></i><span id="pcXY">0000 · 0000</span></div>
+        <!-- HUD: ชื่อหน้า / ตัวกรอง / ค่าสด -->
+        <div class="pc-hud">
+          <h1 class="sr-only" data-i18n="sec.photos">ภาพเบื้องหลังการถ่ายทำ</h1>
+          <div class="pc-filter" id="pcFilter" role="group" aria-label="Filter">
+            <button type="button" data-f="all" aria-pressed="true"><span data-i18n="f.all">ทั้งหมด</span><span class="n"></span></button>
+            <button type="button" data-f="stage" aria-pressed="false"><span data-i18n="f.stage">เวที LED</span><span class="n"></span></button>
+            <button type="button" data-f="crew" aria-pressed="false"><span data-i18n="f.crew">ทีมงาน &amp; กล้อง</span><span class="n"></span></button>
+            <button type="button" data-f="control" aria-pressed="false"><span data-i18n="f.control">ระบบควบคุม</span><span class="n"></span></button>
+          </div>
+          <div class="pc-read" aria-hidden="true">
+            <span class="rec">REC</span><span class="auto-tag">AUTO_SCAN</span><br>
+            PTS <b id="pcPts">0</b> · NODES <b id="pcNodes">0</b><br>
+            CAM_TILT 45° · ICVFX
+          </div>
+          <div class="pc-hint" data-i18n="pc.hint">ชี้ที่ต้นไม้เพื่อดูภาพเต็ม · คลิกเพื่อขยาย</div>
+          <span class="pc-corner c1"></span><span class="pc-corner c2"></span><span class="pc-corner c3"></span><span class="pc-corner c4"></span>
+        </div>
+      </div>
+    </section>
+  </main>
+
+  <footer>
+    <div class="home-foot">
+      <img src="logo/REAL-bangkok3.jpg" alt="REAL Bangkok">
+      <span>© REAL Bangkok · Virtual Production · Global node BKK</span>
+      <span class="barcode" aria-hidden="true"></span>
+    </div>
+    <div class="hazard" aria-hidden="true"><span>&gt; Access granted</span></div>
+  </footer>
+
+  <!-- ============ LIGHTBOX ============ -->
+  <div class="lb" id="lb" hidden role="dialog" aria-modal="true">
+    <button class="lb-close" id="lbClose" type="button" aria-label="Close">×</button>
+    <button class="lb-nav prev" id="lbPrev" type="button" aria-label="Previous">‹</button>
+    <div class="lb-stage" id="lbStage"></div>
+    <button class="lb-nav next" id="lbNext" type="button" aria-label="Next">›</button>
+    <div class="lb-count" id="lbCount"></div>
+    <div class="lb-cap" id="lbCap" aria-hidden="true"></div>
+    <div class="lb-strip" id="lbStrip"></div>
+  </div>
+
+  <script src="js/gallery-data.js"></script>
+  <script src="js/home.js"></script>
+</body>
+</html>
