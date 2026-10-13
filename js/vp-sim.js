@@ -20,7 +20,7 @@ const T = {
     'btn.editWall': 'แก้ขนาดจอ ↗', 'btn.reloadWall': 'โหลดค่าล่าสุด',
     'sec.wall': 'จอ LED', 'sec.content': 'ภาพบนจอ', 'sec.camera': 'กล้อง', 'sec.set': 'นักแสดง & ฉาก',
     drop: 'อัปโหลดภาพ / ลากไฟล์มาวาง / วาง (Ctrl+V)', dropHere: 'วางภาพเพื่อแสดงบนจอ',
-    's.sunset': 'ทะเลทรายยามเย็น', 's.city': 'เมืองกลางคืน', 's.space': 'อวกาศ', 's.bars': 'Test Pattern', 's.nosignal': 'No Signal',
+    's.sunset': 'ทะเลทรายยามเย็น', 's.forest': 'เดินในป่า', 's.city': 'เมืองกลางคืน', 's.space': 'อวกาศ', 's.bars': 'Test Pattern', 's.nosignal': 'No Signal',
     'f.fit': 'การวางภาพ', 'fit.cover': 'เต็มจอ (ครอป)', 'fit.contain': 'พอดีภาพ', 'fit.stretch': 'ยืดเต็มจอ',
     'f.bright': 'ความสว่างจอ', 'f.seams': 'แสดงรอยต่อตู้',
     'f.pixelTrue': 'แสดงพิกเซล LED แบบคมชัด (เห็นเม็ดพิกเซลเมื่อซูมใกล้)',
@@ -62,7 +62,7 @@ const T = {
     'btn.editWall': 'Edit wall size ↗', 'btn.reloadWall': 'Load latest',
     'sec.wall': 'LED wall', 'sec.content': 'Wall content', 'sec.camera': 'Camera', 'sec.set': 'Talent & set',
     drop: 'Upload image / drop a file / paste (Ctrl+V)', dropHere: 'Drop image to show on the wall',
-    's.sunset': 'Desert sunset', 's.city': 'Night city', 's.space': 'Space', 's.bars': 'Test pattern', 's.nosignal': 'No signal',
+    's.sunset': 'Desert sunset', 's.forest': 'Forest walk', 's.city': 'Night city', 's.space': 'Space', 's.bars': 'Test pattern', 's.nosignal': 'No signal',
     'f.fit': 'Image fit', 'fit.cover': 'Fill (crop)', 'fit.contain': 'Fit', 'fit.stretch': 'Stretch',
     'f.bright': 'Wall brightness', 'f.seams': 'Show cabinet seams',
     'f.pixelTrue': 'Sharp LED pixels (see individual pixels up close)',
@@ -104,7 +104,7 @@ const T = {
     'btn.editWall': 'サイズを編集 ↗', 'btn.reloadWall': '最新を読み込む',
     'sec.wall': 'LEDウォール', 'sec.content': '表示する画像', 'sec.camera': 'カメラ', 'sec.set': '演者・セット',
     drop: '画像をアップロード / ドロップ / 貼り付け (Ctrl+V)', dropHere: 'ドロップしてLEDに表示',
-    's.sunset': '砂漠の夕景', 's.city': '夜の街', 's.space': '宇宙', 's.bars': 'テストパターン', 's.nosignal': 'ノーシグナル',
+    's.sunset': '砂漠の夕景', 's.forest': '森を歩く', 's.city': '夜の街', 's.space': '宇宙', 's.bars': 'テストパターン', 's.nosignal': 'ノーシグナル',
     'f.fit': '画像の配置', 'fit.cover': 'フィル (トリミング)', 'fit.contain': '全体表示', 'fit.stretch': '引き伸ばし',
     'f.bright': 'LEDの明るさ', 'f.seams': 'キャビネットの継ぎ目を表示',
     'f.pixelTrue': 'LEDピクセルをシャープに (近づくと画素が見える)',
@@ -258,6 +258,53 @@ function makeSample(kind) {
       g.lineTo(w, h); g.closePath(); g.fill();
     };
     dune(h * 0.7, 28, '#b8574a', 0.3); dune(h * 0.76, 40, '#7e3438', 1.7); dune(h * 0.85, 52, '#4a1d2a', 3.1); dune(h * 0.94, 30, '#25101a', 4.4);
+  } else if (kind === 'forest') {
+    // ป่าสนยามเช้า มีหมอกระหว่างชั้นต้นไม้ + ทางเดินด้านล่าง (สัตว์ GIF เดินทับ ดู wallActor)
+    let gr = g.createLinearGradient(0, 0, 0, h * 0.75);
+    gr.addColorStop(0, '#9fc7c0'); gr.addColorStop(0.55, '#d8e6c4'); gr.addColorStop(1, '#f3eccb');
+    g.fillStyle = gr; g.fillRect(0, 0, w, h);
+    gr = g.createRadialGradient(w * 0.7, h * 0.28, 10, w * 0.7, h * 0.28, h * 0.7);
+    gr.addColorStop(0, 'rgba(255,250,215,.95)'); gr.addColorStop(0.15, 'rgba(255,240,190,.5)'); gr.addColorStop(1, 'rgba(255,240,190,0)');
+    g.fillStyle = gr; g.fillRect(0, 0, w, h);
+    const pine = (x, base, th, tw, col) => {
+      g.fillStyle = col;
+      g.fillRect(x - tw * 0.04, base - th * 0.2, tw * 0.08, th * 0.2);
+      for (let k = 0; k < 4; k++) {
+        const y0 = base - th * (0.12 + k * 0.21), ww = tw * (1 - k * 0.2);
+        g.beginPath(); g.moveTo(x - ww / 2, y0); g.lineTo(x, y0 - th * 0.36); g.lineTo(x + ww / 2, y0); g.closePath(); g.fill();
+      }
+    };
+    const row = (base, minH, maxH, gap, col, fog) => {
+      for (let x = -80; x < w + 80; x += gap * (0.6 + R() * 0.8)) { const th = minH + R() * (maxH - minH); pine(x, base + R() * 20, th, th * 0.42, col); }
+      g.fillStyle = col; g.fillRect(0, base + 10, w, h - base);
+      if (fog) {
+        const fg = g.createLinearGradient(0, base - maxH * 0.6, 0, base + 20);
+        fg.addColorStop(0, 'rgba(230,238,220,0)'); fg.addColorStop(1, `rgba(230,238,220,${fog})`);
+        g.fillStyle = fg; g.fillRect(0, base - maxH * 0.6, w, maxH * 0.6 + 20);
+      }
+    };
+    row(h * 0.6, 260, 420, 70, '#8fae9a', 0.55);
+    row(h * 0.68, 340, 560, 90, '#5f8a6e', 0.45);
+    row(h * 0.76, 420, 700, 120, '#3b6447', 0.35);
+    row(h * 0.84, 520, 860, 170, '#22402c', 0);
+    // แสงลอดยอดไม้
+    g.globalCompositeOperation = 'lighter';
+    for (let i = 0; i < 7; i++) {
+      const x0 = w * (0.45 + R() * 0.45), sp = 40 + R() * 90;
+      gr = g.createLinearGradient(0, 0, 0, h * 0.9);
+      gr.addColorStop(0, 'rgba(255,240,190,.16)'); gr.addColorStop(1, 'rgba(255,240,190,0)');
+      g.fillStyle = gr; g.beginPath(); g.moveTo(x0, 0); g.lineTo(x0 + sp, 0); g.lineTo(x0 - 500 + sp * 3, h * 0.9); g.lineTo(x0 - 500, h * 0.9); g.closePath(); g.fill();
+    }
+    g.globalCompositeOperation = 'source-over';
+    // พื้นป่า + ทางดิน
+    gr = g.createLinearGradient(0, h * 0.84, 0, h);
+    gr.addColorStop(0, '#2c4a2a'); gr.addColorStop(1, '#16260f');
+    g.fillStyle = gr; g.fillRect(0, h * 0.84, w, h * 0.16);
+    g.fillStyle = '#6b5236'; g.beginPath(); g.moveTo(0, h * 0.9);
+    for (let x = 0; x <= w; x += 40) g.lineTo(x, h * 0.9 + Math.sin(x / 300) * 8);
+    for (let x = w; x >= 0; x -= 40) g.lineTo(x, h * 0.97 + Math.sin(x / 260 + 1) * 10);
+    g.closePath(); g.fill();
+    for (let i = 0; i < 900; i++) { g.fillStyle = R() < 0.5 ? 'rgba(60,110,50,.8)' : 'rgba(25,55,25,.8)'; g.fillRect(R() * w, h * (0.85 + R() * 0.15), 3, 8 + R() * 10); }
   } else if (kind === 'city') {
     let gr = g.createLinearGradient(0, 0, 0, h);
     gr.addColorStop(0, '#03040c'); gr.addColorStop(0.6, '#141a3a'); gr.addColorStop(1, '#3a2346');
@@ -681,6 +728,12 @@ function texSize() {
 }
 
 function paintTexture() {
+  drawWall();
+  renderStats();
+  invalidate();
+}
+
+function drawWall() {
   const [cw, ch] = texSize();
   if (texCanvas.width !== cw || texCanvas.height !== ch) {
     texCanvas.width = cw; texCanvas.height = ch;
@@ -698,12 +751,34 @@ function paintTexture() {
     }
     texCtx.imageSmoothingEnabled = true; texCtx.imageSmoothingQuality = 'high';
     texCtx.drawImage(source, (cw - dw) / 2, (ch - dh) / 2, dw, dh);
+    if (wallActorOn()) drawWallActor((cw - dw) / 2, (ch - dh) / 2, dw / iw, dh / ih);
   }
   tex.magFilter = P.pixelTrue ? THREE.NearestFilter : THREE.LinearFilter;
   tex.needsUpdate = true;
   updateLightColors();
-  renderStats();
-  invalidate();
+}
+
+/* ---------- สัตว์เดินในฉากป่า (GIF วาดทับภาพบนจอ เดินจากขวาไปซ้ายวนไปเรื่อยๆ) ---------- */
+const wallActor = { frames: [], durations: [], i: 0, next: 0, last: 0, t0: performance.now() };
+const ACTOR_H = 420, ACTOR_GROUND = 1340, ACTOR_SPEED = 110; // พิกัดในภาพตัวอย่าง 3200×1400, px/s
+const wallActorOn = () => isSample && P.sample === 'forest' && wallActor.frames.length > 0;
+function drawWallActor(ox, oy, kx, ky) {
+  const f = wallActor.frames[wallActor.i];
+  const s = ACTOR_H / f.height, aw = f.width * s;
+  const span = 3200 + aw;
+  const x = 3200 - (((performance.now() - wallActor.t0) / 1000 * ACTOR_SPEED) % span);
+  texCtx.imageSmoothingEnabled = false; // pixel art ให้คม
+  texCtx.drawImage(f, ox + x * kx, oy + (ACTOR_GROUND - ACTOR_H) * ky, aw * kx, ACTOR_H * ky);
+}
+function tickWallActor(now) {
+  if (!wallActorOn() || now - wallActor.last < 33) return false; // ~30 fps พอสำหรับการเลื่อน
+  wallActor.last = now;
+  if (wallActor.frames.length > 1 && now >= wallActor.next) {
+    wallActor.i = (wallActor.i + 1) % wallActor.frames.length;
+    wallActor.next = now + wallActor.durations[wallActor.i];
+  }
+  drawWall();
+  return true;
 }
 
 const avgCanvas = document.createElement('canvas');
@@ -871,7 +946,7 @@ function alphaBox(frames, w, h) {
   return b.x1 > b.x0 ? b : { x0: 0, y0: 0, x1: w, y1: h };
 }
 
-async function loadTalentGif(url) {
+async function decodeGif(url) {
   let frames = [], durations = [];
   try {
     if (!('ImageDecoder' in window)) throw new Error('no ImageDecoder');
@@ -892,6 +967,11 @@ async function loadTalentGif(url) {
     await img.decode();
     frames = [img]; durations = [Infinity];
   }
+  return { frames, durations };
+}
+
+async function loadTalentGif(url) {
+  const { frames, durations } = await decodeGif(url);
   const w = frames[0].width, h = frames[0].height;
   gif.frames = frames; gif.durations = durations; gif.i = 0;
   gif.next = performance.now() + durations[0];
@@ -900,6 +980,9 @@ async function loadTalentGif(url) {
   invalidate();
 }
 loadTalentGif('1587.gif').catch(() => { /* ไม่มีไฟล์: ไม่แสดงนักแสดง */ });
+decodeGif('1885.gif').then(({ frames, durations }) => {
+  Object.assign(wallActor, { frames, durations, i: 0, next: performance.now() + durations[0] });
+}).catch(() => { /* ไม่มีไฟล์: ฉากป่าไม่มีสัตว์ */ });
 
 function tickGif(now) {
   if (!talent.visible || gif.frames.length < 2 || now < gif.next) return false;
@@ -1083,6 +1166,7 @@ function loop(now = performance.now()) {
   requestAnimationFrame(loop);
   if (controls.update()) needs = true;
   if (tickGif(now)) needs = true;
+  if (tickWallActor(now)) needs = true;
   if (!needs) return;
   needs = false;
   render();
