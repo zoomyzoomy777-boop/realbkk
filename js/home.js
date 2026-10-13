@@ -315,6 +315,7 @@
       const cols = Math.ceil(n / rows);
       const start = (row) => Math.floor(n * row / rows);   // แบ่งต้นไม้ให้ทุกแถวเท่า ๆ กัน
       const Wg = cols * SPACING, Hg = rows * SPACING;
+      forestW = Wg; forestH = Hg;
       cam.Dt = Math.max(Wg * F / W, Hg * SN * F / CH) / .9 + 150 * SN;   // ถอยกล้องให้ทั้งป่าอยู่ในจอ (ค่อย ๆ ซูมไปใน frame)
       if (!cam.ready) { cam.D = cam.Dt; cam.ready = true; }
       cam.y0 = 110 * CS;                                 // กึ่งกลางความสูงพุ่มไม้
@@ -330,11 +331,15 @@
         if (!p.pos) p.pos = p.to.slice();
       }
       PHOTOS.forEach((p) => { p.el.hidden = !visible.includes(p); if (!p.to) p.to = [0, 0]; if (!p.pos) p.pos = p.to.slice(); });
+      actTarget(!actor.placed);
     }
 
     /* ---- WebGL2 point renderer ---- */
     const gl = cvs.getContext('webgl2', { antialias: false, premultipliedAlpha: true, alpha: true });
-    let prog = null, vbo = null, count = 0, dirty = false, U = {}, env = null;
+    let prog = null, vbo = null, vao = null, count = 0, dirty = false, U = {}, env = null;
+    let forestW = 0, forestH = 0;   // ขนาดพื้นที่ป่า (หน่วยโลก) = เขตที่สัตว์เดินเล่นได้
+    const ACT_H = 160, ACT_SPEED = 60, ACT_R = 42;   // สัตว์: สูง (หน่วยโลก), หน่วยโลก/วินาที, รัศมีตัว
+    const actor = { x: 0, z: 0, vx: 0, vz: 0, tx: 0, tz: 0, face: 1, best: 1e9, bestAt: 0, placed: false, on: false };
     if (!gl || gl.getParameter(gl.MAX_VERTEX_UNIFORM_VECTORS) < N * 2 + 16) pc.classList.add('pc-off');
     else initGL();
 
@@ -402,6 +407,8 @@
         if (!gl.getProgramParameter(prog, gl.LINK_STATUS)) throw new Error(gl.getProgramInfoLog(prog));
       } catch (err) { console.warn('point cloud disabled:', err); prog = null; pc.classList.add('pc-off'); return; }
       ['uTree', 'uRect', 'uRes', 'uMouse', 'uCen', 'uCam', 'uView', 'uTime', 'uDpr', 'uMotion', 'uBorn'].forEach((n) => { U[n] = gl.getUniformLocation(prog, n); });
+      vao = gl.createVertexArray();
+      gl.bindVertexArray(vao);
       vbo = gl.createBuffer();
       gl.bindBuffer(gl.ARRAY_BUFFER, vbo);
       [[0, 2, 0], [1, 1, 2], [2, 1, 3], [3, 3, 4], [4, 4, 7], [5, 3, 11]].forEach(([loc, n, off]) => {
@@ -503,6 +510,72 @@
     });
     reveal.addEventListener('click', () => { if (hov) openPhoto(visible.indexOf(hov)); });
 
+    /* ---- สัตว์เดินในป่า: ภาพ GIF จริง (ไม่ใช่ point cloud) เดินสุ่มไปมาทั่วป่า หลบต้นไม้ ---- */
+    const actEl = new Image();
+    actEl.className = 'pc-actor';
+    actEl.alt = '';
+    actEl.draggable = false;
+    actEl.onload = () => { actor.on = true; };
+    actEl.onerror = () => actEl.remove();
+    actEl.src = '1885.gif';
+    cvs.after(actEl);
+
+    // ระยะห่างจากต้นไม้ที่ใกล้ที่สุด (ลบด้วยรัศมีที่ต้องเว้น)
+    const actRoom = (p) => p.tree.R * .5 + ACT_R;
+    const clearance = (x, z) => visible.reduce((m, p) => Math.min(m, Math.hypot(x - p.to[0], z - p.to[1]) - actRoom(p)), 1e9);
+    // สุ่มจุดหมายใหม่ในป่าที่ไม่ทับต้นไม้ (place = วางตัวที่จุดนั้นทันที)
+    function actTarget(place) {
+      const hw = forestW / 2 + 40, hh = forestH / 2 + 40;
+      let bx = 0, bz = 0, bc = -1e9;
+      for (let i = 0; i < 24; i++) {
+        const x = (Math.random() * 2 - 1) * hw, z = (Math.random() * 2 - 1) * hh, c = clearance(x, z);
+        if (c > bc) { bx = x; bz = z; bc = c; }
+        if (c > 30) break;
+      }
+      actor.tx = bx; actor.tz = bz;
+      actor.best = 1e9; actor.bestAt = performance.now();
+      if (place) { actor.x = bx; actor.z = bz; actor.placed = true; actTarget(false); }
+    }
+
+    function drawActor(now, dt, mo) {
+      if (!actor.on) return;
+      const a = actor;
+      if (mo) {
+        let dx = a.tx - a.x, dz = a.tz - a.z;
+        const dist = Math.hypot(dx, dz);
+        if (dist < a.best - 20) { a.best = dist; a.bestAt = now; }
+        if (dist < 25 || now - a.bestAt > 5000) actTarget(false);   // ถึงแล้ว / ติดอยู่นาน → ไปที่ใหม่
+        dx /= dist || 1; dz /= dist || 1;
+        // หลบต้นไม้: แรงผลักออก + แรงเลี้ยวอ้อมไปด้านที่ใกล้เป้าหมาย
+        let sx = dx, sz = dz;
+        visible.forEach((p) => {
+          const ex = a.x - p.pos[0], ez = a.z - p.pos[1], d = Math.hypot(ex, ez) || 1, R = actRoom(p), zone = R + 70;
+          if (d > zone) return;
+          const w = Math.pow((zone - d) / 70, 2), nx = ex / d, nz = ez / d;
+          const side = (-nz * dx + nx * dz) >= 0 ? 1 : -1;
+          sx += (nx * .8 - nz * side * 1.2) * w;
+          sz += (nz * .8 + nx * side * 1.2) * w;
+        });
+        const sl = Math.hypot(sx, sz) || 1, sp = ACT_SPEED * Math.min(1, dist / 80 + .35);
+        const ke = Math.min(1, dt * 2.5);
+        a.vx += (sx / sl * sp - a.vx) * ke;
+        a.vz += (sz / sl * sp - a.vz) * ke;
+        a.x += a.vx * dt; a.z += a.vz * dt;
+        // ห้ามทะลุลำต้น
+        visible.forEach((p) => {
+          const ex = a.x - p.pos[0], ez = a.z - p.pos[1], d = Math.hypot(ex, ez) || 1, R = actRoom(p) * .8;
+          if (d < R) { a.x = p.pos[0] + ex / d * R; a.z = p.pos[1] + ez / d * R; }
+        });
+        if (a.vx > 8) a.face = -1; else if (a.vx < -8) a.face = 1;   // ภาพต้นฉบับหันซ้าย
+      }
+      // วางภาพตั้งตรงบนพื้น: เท้า = proj(x, 0, z), ความสูง = ACT_H
+      const [sx, sb, , d] = proj(a.x, 0, a.z), [, st] = proj(a.x, ACT_H, a.z);
+      const s = Math.max(.05, (sb - st) / 100);
+      const fog = 1 - Math.min(1, Math.max(0, (d + 100) / 1000)) * .5;
+      actEl.style.transform = `translate(${sx}px, ${sb}px) scale(${a.face * s}, ${s}) translate(-50%, -100%)`;
+      actEl.style.opacity = (born * fog).toFixed(3);
+    }
+
     const treeArr = new Float32Array(N * 4), rectArr = new Float32Array(N * 4);
     let running = false, last = 0, born = reduceMotion ? 1 : 0, loaded = 0, seenAt = 0, hudAt = 0;
     const hudPts = $('pcPts'), hudNodes = $('pcNodes');
@@ -562,8 +635,10 @@
         gl.uniform3f(U.uView, CS, SN, cam.D);
         gl.uniform1f(U.uTime, now / 1000); gl.uniform1f(U.uDpr, dpr);
         gl.uniform1f(U.uMotion, mo); gl.uniform1f(U.uBorn, born);
+        gl.bindVertexArray(vao);
         gl.drawArrays(gl.POINTS, 0, count);
       }
+      drawActor(now, dt, mo);
       requestAnimationFrame(frame);
     }
 
